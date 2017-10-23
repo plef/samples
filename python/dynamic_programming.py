@@ -143,5 +143,11 @@ the result.""")
         print ("Ugly(%d): %s " % (x, uglynumber(x)))
         print ("Ugly2(%d): %s " % (x, uglynumber2(x)))
 
+    a = [1,2,3,4,5]
+    x = tuple(a[3:4])
+    
+    print (0xa +0xA)
+    print (x)
+
 if __name__ == "__main__":
     main()
