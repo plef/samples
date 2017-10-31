@@ -5,25 +5,19 @@ See:
     http://www.geeksforgeeks.org/longest-increasing-subsequence/
 """
 
-# Here I would like to print all the increasing sequences present in the list,
-# (it means also each element of the list makes an increasing sequence), or maybe
-# just all the LIS sequences defined for given input list.
-# Well, that's not the case, but at least it seems able to find the LIS besides
-# the other results.
+# Here I would like to print all the longest increasing sequence(s) present in the list,
 
 # It's kind of nasty solution, as it
 
-# 1 - does not find all the increasing sequences, only some, although the LIS is
-# always found (but, is it really found >always<, if only some of all possible
-# results are found?). Hm, well, at the same time, it might be actually good thing,
-# since if one would like to obtain >only< LIS sequences, I do not find >all< possibilities
-# to filter them out. So, the algorithm is half way to it:)
+# 1 - does find all the longest increasing sequences, but still keeps also some shorter ones
+# as candidates found on the way. So, the algorithm is half way to it:)
 
 # 2 - sometimes it finds identical results, although the items of those are not
 # the same items always (they came form respective indeces in the input list, when
-# there are redundant items in it) ... see testcase 3 for example. 
+# there are redundant items in it) ... see testcase 3 for example. Not a bug.
 #
-# Indeed, runnign this on G2G http://practice.geeksforgeeks.org/problems/longest-increasing-subsequence/0
+# Maybe there's a faster way. Indeed, running this on G4G
+# http://practice.geeksforgeeks.org/problems/longest-increasing-subsequence/0
 # they tell me this :( ...
 #
 #    Your program took more time than expected.
@@ -33,7 +27,7 @@ See:
 
 def lis(S):
     """
-Walk thorugh sequence S, to collect a sequence Ri such that it is increasing.
+Walk through sequence S, to collect a sequence Ri such that it is increasing.
 E.g. [1,2,3]: iterating, compare 1 and 2, to see result can be [1,2],
 then seeing that 2 < 3, so result can be appended with 3 to make [1,2,3].
 With e.g. [1,3,2,4], do a split at 2 (trigger look for another result)
@@ -48,17 +42,20 @@ to form Rinit result as [1,2,3] and continue looking for further increasing item
 in the rest of the input where the split has begun, i.e. in [4,5,6] to finally
 find the longest increasing sequence, [1,2,3,4,5,6]. This includes also the case,
 when the position for the non-greater item is 0, i.e. Rinit is empty. So it can find
-also LIS e.g. in [3,4,1,2,3]
+also LIS e.g. in [3,4,1,2,3] - the sequence [1,2,3].
 
 Note that generally, some sequences can have more than one LIS, e.g. [2,1] has [2] and [1] etc.
 
 """
     R = []
+    totO = 0
     def split(x, si, Ri, Si):
         # 'x' is not greater than R[-1], so find out where it cna be put inside Ri
         # and trigger lookup for another increasing sequence with that.
         Rinit = []
+        nonlocal totO
         for i in range(len(Ri)-1, -1, -1):
+            totO += 1
             if x > Ri[i]:
                 # start looking for next possible result with Ri[:i+1] + [x] in S[si:]
                 Rinit = Ri[:i+1]
@@ -70,7 +67,9 @@ Note that generally, some sequences can have more than one LIS, e.g. [2,1] has [
         # If >= item found, do split() to trigger paralel search which will collect
         # the items into Ri'.
         Ri = Rinit + Si[0:1]
+        nonlocal totO
         for i in range(0, len(Si)-1):
+            totO += 1
             if Ri[-1] < Si[i+1]:
                 Ri.append(Si[i+1])
             else:
@@ -84,8 +83,21 @@ Note that generally, some sequences can have more than one LIS, e.g. [2,1] has [
     else:
         lookres(S[0:], [])
             
-    print(R)
+    print(R, "tot iterations", totO)
     return R
+
+# G4G version (via Tabulation, opposed to a version with 2^(N-1)-1 complexity, the tabulated has O((N^2-N)/2))
+# - this is for finding just the LIS length, not the sequence(s) specifically.
+def g4gLisTab(S):
+    n = len(S)
+    tab = [1]*n
+    totO = 0
+    for i in range(1, n):
+        for j in range(0, i):
+            totO += 1
+            if S[j] < S[i] and tab[i] < tab[j] + 1:
+                tab[i] = tab[j] + 1
+    print("Len by G4G:", (max(tab) if n > 0 else 0), tab, "tot iterations", totO)
 
 # Testcases. In each tuple, t[0] is input sequences, t[1] is the correct solution
 T = {
@@ -94,6 +106,7 @@ T = {
     3:([1,2,4,5,3,4,5,6], [[1,2,3,4,5,6]]),
     4:([10, 22, 9, 33, 21, 50, 41, 60, 80], [[10, 22, 33, 50, 60, 80]]),
     5:([3,4,1,2,3], [[1,2,3]]),
+    6:([4,3,2,1,0], [[4]]),
     7:([1,2], [[1,2]]),
     9:([1,1], [[1],[1]]),
     10:([2,1], [[2],[1]]),
@@ -110,12 +123,13 @@ for t in T:
         if not r in R:# or not len(R) == len(tx[1]):
             raise Exception(T[t], "Test %d failed" % t)
             break
-    else:
-        print (t, "OK")
+        else:
+            g4gLisTab(tx[0])
+            print (t, "OK")
 
 
-if False and "runing_on_g2g":
-    # Note: to test the lis() on G2G (see link at the head of this file), attach this beneath lis() code
+if False and "runing_on_g4g":
+    # Note: to test the lis() on G4G (see link at the head of this file), attach this beneath lis() code
     # to read G2G testcases from them:
 
     import sys

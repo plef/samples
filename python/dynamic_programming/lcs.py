@@ -17,6 +17,7 @@ See:
 # Some dyn prog solution is at https://en.wikipedia.org/wiki/Longest_common_subsequence_problem#Code_for_the_dynamic_programming_solution
 def lcs(A, B):
     R = [[]]
+    tot = 0
     def _add_result(Si):
         # nonlocal R ... hmm, not needed...
         # workaround problem (2)
@@ -28,6 +29,9 @@ def lcs(A, B):
         # workaround problem (1)
         if len(Si) and not Si in R: R.append(Si) # 
     def _lcs(A, B, Si):
+        nonlocal tot
+        tot += 1
+        
         #nonlocal R ... hmm, not needed
         if len(A) == 0 or len(B) == 0:
             _add_result(Si)
@@ -51,7 +55,7 @@ def lcs(A, B):
         return
     
     _lcs(A, B, [])
-    print (R)
+    print (R, "in tot", tot, "steps")
     return R
 
 # Testcases. In each tuple, t[0] and t[1] are input sequences, t[2] is the correct solution

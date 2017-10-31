@@ -8,7 +8,7 @@ import sys
 
 print (sys.version)
 
-n = 4 #input("Enter number: ")
+n = 4
 a = [ ]
 
 # Machinery
@@ -79,20 +79,28 @@ foo = Clsbar()
 foo.quack(1, 2)
 foo.quack("1","2")
 bar = Clsbar
-if bar is Clsfoo: print ("bar is Clsfoo") 
+# bar is referring to class, not class instance object:
+if bar is Clsfoo: print ("bar is Clsfoo")
+else:
+    print (type(bar))
+# bar.quack(3,4) .. error, missing 3rd param - could be only bar.quack(foo, 3,4)
+bar.quack(foo, 3,4)
+
 
 print ("""Bye bye
 ...Mr. 'merican pye.""")
 
 astr = "abcdefgh"
 print (astr[0:-3], astr[3], astr[0:-10], astr[:2])
+print(astr[::2], astr[::-1])
 
 print (max(("1","2","3")))
 print (math.exp(1), round(math.e, 2))
 
 print ("fact(), i.e. with default values: %d" % (fact()))
 
-if ("python").find("th", 1, 4): print ("ok".capitalize())
+if ("python").find("th", 0, 3): print ("ok".capitalize())
+print("python".find("ooo"))
 
 # string is separator for elements in sequence passed to join(). Separator seems to be never used after last element of that sequence
 aseq = ("a","bc","d") # or [x,...] or {x:y,...}
@@ -102,8 +110,9 @@ print ("012".join("a"))
 print ("012".join(["abc", "def"]))
 print ("012".join(("abc", "+-*", ".")))
 print ("012".join({"ab":"+-", "cd":"01"}))
+print ("+".join(list(map(str,[1.4, 4.21])))) # in 2.7, map reruns list, in 3.6 it returns iterator, so its very different what we get from map() across versions
 
-print ("HELLO".ljust(10,"-").rjust(15))
+print ("HELLO".ljust(10,"-").rjust(15)) # the fill character must e 1 character long, so passing e.g. "--" produces error
 
 if 0:
     # Only in Python 3.x
@@ -144,7 +153,7 @@ def cmp_python3(a, b):
     return (a > b) - (a < b)
 
 # In case of coercion betw. int and str, in python 2 if operands are different type,
-# the name of type determines the result of comparison: 100 < "2" is True, bec. 'string' < 'int'
+# the name of type determines the result of comparison: 100 < "2" is True, bec. 'string' > 'int'
 
 print (cmp_python3([0], [0]))
 print (cmp_python3([0], [1]))
@@ -167,11 +176,12 @@ print (None)
 print ({}, [], ())
 print (0 == 0)
 #print (None < None)    # error, NoneType cannot be orderd with anything else, nor with NoneType
-#print (False == 0 < True < {} < [] < ())
+#print (False == 0 < True < {} < [] < ()) .. only in python 2, whre it compares different types (where cannot interpret into number) by name, i.e. 'dict' < 'list' < 'string' < 'tuple'
 print (False == 0 < True)  # True, False, 0 ... all is numeric type
 
-print (["abc"] < ["x"])
-print (["abc", "a"] < ["x"])
+print ("['abc'] < ['x'] ? ", ["abc"] < ["x"]) # ... does not compare lengths, it sees 'a' < 'x' here!
+print ("['abc', 'a'] < ['x'] ?", ["abc", "a"] < ["x"]) # ... likewise...
+print ("abc" < "x")
 
 student_tuples = [
     ('john', 'A', 15),
@@ -257,6 +267,7 @@ for s in dir():
     if "__" in s and s in globals().keys(): print (s.ljust(15), globals()[s])
 
 def func():
+    "nothing"
     myvar = "hello"
     print ("Locals: ", locals())
 
@@ -308,7 +319,8 @@ print (gunman.shoot())
 gunman.shoot = lambda s: ("BANG!" + s)
 print (gunman.shoot("BANG!!!"))
 del gunman.shoot
-#del gunman.quack # Error, there's no object-level attribute 'quack'
+#del gunman.quack # Error, there's no class instance attribute 'quack'
+#... to remove quack(), class object must be used for del
 
 
 # Hey, what if NOW redefine quack() for the class?
